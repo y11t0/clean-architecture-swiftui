@@ -19,7 +19,7 @@ enum DeepLink: Equatable {
             let query = components.queryItems
             else { return nil }
         if let item = query.first(where: { $0.name == "alpha3code" }),
-            let alpha3Code = item.value {
+            let alpha3Code = item.value, !alpha3Code.isEmpty {
             self = .showCountryFlag(alpha3Code: alpha3Code)
             return
         }

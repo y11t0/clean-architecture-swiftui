@@ -6,11 +6,22 @@
 //  Copyright © 2020 Alexey Naumov. All rights reserved.
 //
 
+import Foundation
 import Testing
 @testable import CountriesSwiftUI
 
 @MainActor
 @Suite struct DeepLinksHandlerTests {
+
+    @Test func parsingDeepLinkWithCountryCode() throws {
+        let url = try #require(URL(string: "https://www.example.com/?alpha3code=ITA"))
+        #expect(DeepLink(url: url) == .showCountryFlag(alpha3Code: "ITA"))
+    }
+
+    @Test func parsingDeepLinkWithEmptyCountryCode() throws {
+        let url = try #require(URL(string: "https://www.example.com/?alpha3code="))
+        #expect(DeepLink(url: url) == nil)
+    }
 
     @Test func noSideEffectOnInit() {
         let interactors: DIContainer.Interactors = .mocked()

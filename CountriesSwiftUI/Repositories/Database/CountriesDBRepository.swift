@@ -50,7 +50,7 @@ extension MainDBRepository: CountriesDBRepository {
             }
             let object = DBModel.CountryDetails(
                 alpha3Code: alpha3Code,
-                capital: countryDetails.capital,
+                capital: countryDetails.capital ?? "",
                 currencies: currencies,
                 neighbors: neighbors)
             modelContext.insert(object)

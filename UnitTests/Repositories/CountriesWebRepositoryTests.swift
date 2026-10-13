@@ -7,6 +7,7 @@
 //
 
 import Testing
+import Foundation
 @testable import CountriesSwiftUI
 
 @Suite(.serialized) final class CountriesWebRepositoryTests {
@@ -48,6 +49,28 @@ import Testing
         await #expect(throws: APIError.unexpectedResponse) {
             try await sut.details(country: country.dbModel())
         }
+    }
+
+    @Test func countryDetailsWhenAnotherMatchHasNoCapital() async throws {
+        let countries = await ApiModel.Country.mockedData
+        let value = ApiModel.CountryDetails(
+            capital: "Beijing",
+            currencies: [ApiModel.Currency(code: "CNY", symbol: "¥", name: "Chinese yuan")],
+            borders: nil)
+        let territory = ApiModel.CountryDetails(capital: nil, currencies: [], borders: nil)
+        let country = countries[0]
+        try mock(.countryDetails(countryName: country.name), result: .success([value, territory]))
+        let response = try await sut.details(country: country.dbModel())
+        #expect(response == value)
+    }
+
+    @Test func countryDetailsDecodingWithoutCapitalAndCurrencies() throws {
+        let json = #"[{"capital": "Beijing", "currencies": [{"code": "CNY", "name": "Chinese yuan", "symbol": "¥"}]}, {"name": "Antarctica", "borders": []}]"#
+        let response = try JSONDecoder().decode([ApiModel.CountryDetails].self, from: Data(json.utf8))
+        #expect(response.count == 2)
+        #expect(response[0].capital == "Beijing")
+        #expect(response[0].currencies.count == 1)
+        #expect(response[1] == ApiModel.CountryDetails(capital: nil, currencies: [], borders: []))
     }
 
     // MARK: - Helper

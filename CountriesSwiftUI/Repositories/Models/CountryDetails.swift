@@ -31,8 +31,21 @@ extension DBModel {
 
 extension ApiModel {
     struct CountryDetails: Codable, Equatable {
-        let capital: String
+        let capital: String?
         let currencies: [Currency]
         let borders: [String]?
+
+        enum CodingKeys: String, CodingKey {
+            case capital, currencies, borders
+        }
+    }
+}
+
+extension ApiModel.CountryDetails {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        capital = try container.decodeIfPresent(String.self, forKey: .capital)
+        currencies = try container.decodeIfPresent([ApiModel.Currency].self, forKey: .currencies) ?? []
+        borders = try container.decodeIfPresent([String].self, forKey: .borders)
     }
 }

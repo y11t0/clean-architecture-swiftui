@@ -132,7 +132,9 @@ private extension CountryDetails {
         Section(header: Text("Basic Info")) {
             DetailRow(leftLabel: Text(country.alpha3Code), rightLabel: "Code")
             DetailRow(leftLabel: Text("\(country.population)"), rightLabel: "Population")
-            DetailRow(leftLabel: Text("\(countryDetails.capital)"), rightLabel: "Capital")
+            if !countryDetails.capital.isEmpty {
+                DetailRow(leftLabel: Text("\(countryDetails.capital)"), rightLabel: "Capital")
+            }
         }
     }
     

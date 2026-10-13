@@ -7,6 +7,7 @@
 //
 
 import Testing
+import Foundation
 @testable import CountriesSwiftUI
 
 @Suite(.serialized) final class CountriesWebRepositoryTests {
@@ -39,6 +40,34 @@ import Testing
         try mock(.countryDetails(countryName: country.name), result: .success([value]))
         let response = try await sut.details(country: country.dbModel())
         #expect(response == value)
+    }
+
+    @Test func countryDetailsWhenCapitalIsMissing() async throws {
+        let countries = await ApiModel.Country.mockedData
+        let value = ApiModel.CountryDetails(capital: nil, currencies: [], borders: ["CHN"])
+        let country = countries[0]
+        try mock(.countryDetails(countryName: country.name), result: .success([value]))
+        let response = try await sut.details(country: country.dbModel())
+        #expect(response == value)
+        #expect(response.capital == nil)
+    }
+
+    @Test func countryDetailsDecodingSkipsAbsentCapitalAndCurrencies() throws {
+        let json = """
+        [
+            {"name": "China", "capital": "Beijing",
+             "currencies": [{"code": "CNY", "symbol": "¥", "name": "Chinese yuan"}],
+             "borders": ["MAC"]},
+            {"name": "Macao", "borders": ["CHN"]}
+        ]
+        """
+        let response = try JSONDecoder().decode([ApiModel.CountryDetails].self, from: Data(json.utf8))
+        #expect(response.count == 2)
+        #expect(response[0].capital == "Beijing")
+        #expect(response[0].currencies.count == 1)
+        #expect(response[1].capital == nil)
+        #expect(response[1].currencies == [])
+        #expect(response[1].borders == ["CHN"])
     }
 
     @Test func countryDetailsWhenDetailsAreEmpty() async throws {
